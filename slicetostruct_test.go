@@ -1,4 +1,4 @@
-package slicestruct
+package slicetostruct
 
 import (
 	"fmt"
