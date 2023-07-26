@@ -57,7 +57,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 	curStruct := pointToStruct.Elem()
 	kind := curStruct.Kind()
 	if kind != reflect.Struct {
-		return nil, fmt.Errorf("")
+		return nil, errors.New("generic type does not struct")
 	}
 
 	structType := pointToStruct.Elem().Type()
