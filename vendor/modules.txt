@@ -1,3 +1,0 @@
-# github.com/go-faster/errors v0.6.1
-## explicit; go 1.18
-github.com/go-faster/errors
