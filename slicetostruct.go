@@ -68,6 +68,9 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 		if len(tags) > 0 && tags[0] != "" {
 			sliceFieldName = tags[0]
 		}
+		if sliceFieldName == "-" {
+			continue
+		}
 
 		fieldIndex, err := sTS.GetSliceIndexForField(sliceFieldName, i, len(items))
 		if err != nil && !errors.Is(err, ErrIndexDoesNotExist) {
