@@ -64,7 +64,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 	for i := 0; i < structType.NumField(); i++ {
 		fieldInfo := structType.Field(i)
 		sliceFieldName := fieldInfo.Name
-		tags := strings.Split(fieldInfo.Tag.Get(keyTag), ",")
+		tags := getTags(fieldInfo.Tag.Get(keyTag))
 		if len(tags) > 0 && tags[0] != "" {
 			sliceFieldName = tags[0]
 		}
@@ -187,4 +187,12 @@ func (sTS *SliceToStruct[T]) GetSliceIndexForField(fieldName string, fieldIndex 
 		return 0, ErrIndexDoesNotExist
 	}
 	return fieldIndex, nil
+}
+
+func getTags(tagStr string) []string {
+	res := []string{}
+
+	res = strings.Split(tagStr, ".")
+
+	return res
 }
