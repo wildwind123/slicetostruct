@@ -192,7 +192,14 @@ func (sTS *SliceToStruct[T]) GetSliceIndexForField(fieldName string, fieldIndex 
 func getTags(tagStr string) []string {
 	res := []string{}
 
-	res = strings.Split(tagStr, ".")
+	res = strings.Split(tagStr, ",")
+	for i := range res {
+		if len(res) >= (i+1) && strings.HasSuffix(res[i], `\`) {
+			res[i] = res[i][:len(res[i])-1] + res[i+1]
+
+			fmt.Println("sss")
+		}
+	}
 
 	return res
 }
