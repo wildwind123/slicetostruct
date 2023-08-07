@@ -221,22 +221,22 @@ func TestGetTags(t *testing.T) {
 	if res[0] != "test" || len(res) != 1 {
 		t.Error("wrong result")
 	}
-	res = getTags(`test\,test1,dddd323`)
+	res = getTags(`test#,test1,dddd323`)
 	if res[0] != `test,test1` || res[1] != "dddd323" || len(res) != 2 {
 		t.Error("wrong result")
 	}
-	res = getTags(`Организация\, у которой прибор учета находится на праве собственности или на ином законном основании,test,123`)
+	res = getTags(`Организация#, у которой прибор учета находится на праве собственности или на ином законном основании,test,123`)
 	if len(res) != 3 ||
 		res[0] != `Организация, у которой прибор учета находится на праве собственности или на ином законном основании` ||
 		res[1] != `test` ||
 		res[2] != `123` {
 		t.Error("wrong result")
 	}
-	res = getTags(`test\,test1`)
+	res = getTags(`test#,test1`)
 	if res[0] != `test,test1` || len(res) != 1 {
 		t.Error("wrong result")
 	}
-	res = getTags(`test1,test\,test1`)
+	res = getTags(`test1,test#,test1`)
 	if res[0] != `test1` || res[1] != `test,test1` || len(res) != 2 {
 		t.Error("wrong result")
 	}

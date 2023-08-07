@@ -193,7 +193,7 @@ func getTags(tagStr string) []string {
 
 	res := strings.Split(tagStr, ",")
 	for i := range res {
-		if len(res) >= (i+1) && strings.HasSuffix(res[i], `\`) {
+		if len(res) >= (i+1) && strings.HasSuffix(res[i], `#`) {
 			res[i] = res[i][:len(res[i])-1] + "," + res[i+1]
 
 			if len(res) >= (i + 2) {
