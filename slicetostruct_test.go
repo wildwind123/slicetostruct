@@ -26,6 +26,18 @@ type T4 struct {
 	ID3 int64 `ss:",omitempty"`
 }
 
+type T5 struct {
+	ID  int64 `ss:"id"`
+	ID2 int64 `ss:"-"`
+	ID3 int64 `ss:"id3"`
+}
+
+type T6 struct {
+	ID    int64 `ss:"id"`
+	ID2   int64 `ss:"id2"`
+	ID1_2 int64 `ss:"-"`
+}
+
 type TAll struct {
 	ID         int64      `ss:"id"`
 	Name       string     `ss:"name"`
@@ -163,4 +175,33 @@ func TestOmitEmpty(t *testing.T) {
 		return
 	}
 	fmt.Println(t4)
+}
+
+func TestSkip(t *testing.T) {
+	sliceToStruct := New[T5](Params{})
+	t4, err := sliceToStruct.ToStruct([]string{"1", "2", "4"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if t4.ID != 1 || t4.ID2 != 0 || t4.ID3 != 4 {
+		t.Error("wrong result")
+		return
+	}
+
+}
+
+func TestSkip2(t *testing.T) {
+	sliceToStruct := New[T6](Params{})
+
+	sliceToStruct.SetFieldNames([]string{"fake", "id", "id2", "ss"})
+	res, err := sliceToStruct.ToStruct([]string{"d", "123", "33"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if res.ID != 123 || res.ID2 != 33 || res.ID1_2 != 0 {
+		t.Error("wrong result")
+		return
+	}
 }
