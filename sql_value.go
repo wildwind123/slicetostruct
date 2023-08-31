@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/go-faster/errors"
 )
 
 type ConvertSqlValue struct {
-	Value sql.NullInt64
+	Value  sql.NullInt64
+	params *Params
 }
 
 func (c *ConvertSqlValue) Set(value *ConvertValueParams) error {
@@ -27,6 +29,9 @@ func (c *ConvertSqlValue) Set(value *ConvertValueParams) error {
 		}
 		value.ReflectValue.Set(reflect.ValueOf(v))
 	case "sql.NullFloat64":
+		if c.params.ReplaceCommaToDot {
+			value.Items[value.Index] = strings.Replace(value.Items[value.Index], ",", ".", 1)
+		}
 		v := sql.NullFloat64{}
 		err = v.Scan(value.Items[value.Index])
 		if err != nil {
