@@ -31,7 +31,8 @@ func New[T any](params Params) *SliceToStruct[T] {
 		params.converters = &converters{}
 		params.converters.SetConverter("int64", &ConvertInt64{})
 		params.converters.SetConverter("*int64", &ConvertNullInt64{})
-		params.converters.SetConverter("int", &ConvertNullInt64{})
+		params.converters.SetConverter("int", &ConvertInt{})
+		params.converters.SetConverter("sql.NullInt64", &ConvertSqlNullInt64{})
 	}
 
 	sTS := &SliceToStruct[T]{
@@ -114,7 +115,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 		if err == nil {
 			err = converter.Set(&ConvertValueParams{
 				Items:        items,
-				Index:        i,
+				Index:        fieldIndex,
 				ReflectValue: &field,
 				Tags:         tags,
 				FieldName:    &sliceFieldName,

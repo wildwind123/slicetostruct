@@ -1,6 +1,7 @@
 package slicetostruct
 
 import (
+	"reflect"
 	"strconv"
 
 	"github.com/go-faster/errors"
@@ -16,6 +17,6 @@ func (c *ConvertInt) Set(value *ConvertValueParams) error {
 		return errors.Wrapf(err, "cant ParseInt, %s", value.Items[value.Index])
 	}
 	c.Value = int(v)
-	value.ReflectValue.SetInt(v)
+	value.ReflectValue.Set(reflect.ValueOf(c.Value))
 	return nil
 }

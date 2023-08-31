@@ -1,6 +1,7 @@
 package slicetostruct
 
 import (
+	"database/sql"
 	"fmt"
 	"testing"
 	"time"
@@ -50,6 +51,10 @@ type T8 struct {
 	ID    int64 `ss:"'is, id',omitempty"`
 	ID2   int64 `ss:"id2"`
 	ID1_2 int64 `ss:"-"`
+}
+
+type T9 struct {
+	ID sql.NullInt64
 }
 
 type TAll struct {
@@ -279,6 +284,18 @@ func TestSetConverter(t *testing.T) {
 	sliceToStruct.SetConverter("int64", &Int64Test{})
 	res, _ = sliceToStruct.ToStruct([]string{"1", "123", "33"})
 	if res.ID != 333 || res.ID1_2 != 0 || res.ID2 != 123 {
+		t.Error("wrong result")
+	}
+}
+
+func TestSqlNullInt64(t *testing.T) {
+	sliceToStruct := New[T9](Params{})
+	res, err := sliceToStruct.ToStruct([]string{"1", "123", "33"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res.ID.Int64 != 1 && res.ID.Valid {
 		t.Error("wrong result")
 	}
 	fmt.Println(res)
