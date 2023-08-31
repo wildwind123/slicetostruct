@@ -23,17 +23,9 @@ type SliceToStruct[T any] struct {
 type Params struct {
 	ReturnErrIndexDoesNotExist bool
 	FieldNames                 []string
-	converters                 *converters
 }
 
 func New[T any](params Params) *SliceToStruct[T] {
-	if params.converters == nil {
-		params.converters = &converters{}
-		params.converters.SetConverter("int64", &ConvertInt64{})
-		params.converters.SetConverter("*int64", &ConvertNullInt64{})
-		params.converters.SetConverter("int", &ConvertNullInt64{})
-	}
-
 	sTS := &SliceToStruct[T]{
 		Params: params,
 	}
@@ -103,19 +95,28 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			continue
 		}
 
-		converter, err := sTS.converters.GetConverter("fieldType")
-		if err != nil && !errors.Is(err, ErrConverterDoesNotExist) {
-			return nil, errors.Wrap(err, "cant sTS.converters.GetConverter")
-		}
-		if err == nil {
-			converter.Set(&ConvertValueParams{
-				StringValue:  items[fieldIndex],
-				ReflectValue: &field,
-			})
-			continue
-		}
-
 		switch fieldType {
+		case "int64":
+			v, err := strconv.ParseInt(items[fieldIndex], 10, 64)
+			if err != nil {
+				return nil, errors.Wrap(err, "")
+			}
+			field.SetInt(v)
+		case "*int64":
+			if items[fieldIndex] == "" {
+				continue
+			}
+			v, err := strconv.ParseInt(items[fieldIndex], 10, 64)
+			if err != nil {
+				return nil, errors.Wrap(err, "")
+			}
+			field.Set(reflect.ValueOf(&v))
+		case "int":
+			v, err := strconv.ParseInt(items[fieldIndex], 10, 64)
+			if err != nil {
+				return nil, errors.Wrap(err, "")
+			}
+			field.Set(reflect.ValueOf(int(v)))
 		case "*int":
 			v, err := strconv.ParseInt(items[fieldIndex], 10, 64)
 			if err != nil {
