@@ -12,6 +12,7 @@ type ConvertValueParams struct {
 	ReflectValue *reflect.Value
 	Tags         []string
 	FieldName    *string
+	FieltType    string
 }
 
 type Converter interface {

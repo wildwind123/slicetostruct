@@ -32,7 +32,14 @@ func New[T any](params Params) *SliceToStruct[T] {
 		params.converters.SetConverter("int64", &ConvertInt64{})
 		params.converters.SetConverter("*int64", &ConvertNullInt64{})
 		params.converters.SetConverter("int", &ConvertInt{})
-		params.converters.SetConverter("sql.NullInt64", &ConvertSqlNullInt64{})
+		params.converters.SetConverter("sql.NullInt64", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullFloat64", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullString", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullInt32", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullInt16", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullByte", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullBool", &ConvertSqlValue{})
+		params.converters.SetConverter("sql.NullTime", &ConvertSqlValue{})
 	}
 
 	sTS := &SliceToStruct[T]{
@@ -119,6 +126,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 				ReflectValue: &field,
 				Tags:         tags,
 				FieldName:    &sliceFieldName,
+				FieltType:    fieldType,
 			})
 			if err != nil {
 				return nil, errors.Wrap(err, "cant converter.Set")
