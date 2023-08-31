@@ -295,7 +295,7 @@ func TestSqlNullInt64(t *testing.T) {
 		t.Errorf("%+v", err)
 		return
 	}
-	if res.ID.Int64 != 1 && res.ID.Valid {
+	if res.ID.Int64 != 1 || !res.ID.Valid {
 		t.Error("wrong result")
 	}
 	fmt.Println(res)
