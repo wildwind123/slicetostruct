@@ -41,6 +41,10 @@ func New[T any](params Params) *SliceToStruct[T] {
 	return sTS
 }
 
+func (sTS *SliceToStruct[T]) SetConverter(name string, converter Converter) {
+	sTS.converters.SetConverter(name, converter)
+}
+
 func (sTS *SliceToStruct[T]) SetFieldNames(fieldNames []string) {
 	if len(fieldNames) == 0 {
 		sTS.fieldNames = nil
@@ -103,15 +107,21 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			continue
 		}
 
-		converter, err := sTS.converters.GetConverter("fieldType")
+		converter, err := sTS.converters.GetConverter(fieldType)
 		if err != nil && !errors.Is(err, ErrConverterDoesNotExist) {
 			return nil, errors.Wrap(err, "cant sTS.converters.GetConverter")
 		}
 		if err == nil {
-			converter.Set(&ConvertValueParams{
-				StringValue:  items[fieldIndex],
+			err = converter.Set(&ConvertValueParams{
+				Items:        items,
+				Index:        i,
 				ReflectValue: &field,
+				Tags:         tags,
+				FieldName:    &sliceFieldName,
 			})
+			if err != nil {
+				return nil, errors.Wrap(err, "cant converter.Set")
+			}
 			continue
 		}
 

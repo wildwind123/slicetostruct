@@ -12,12 +12,12 @@ type ConvertNullInt64 struct {
 }
 
 func (c *ConvertNullInt64) Set(value *ConvertValueParams) error {
-	if value.StringValue == "" {
+	if value.Items[value.Index] == "" {
 		return nil
 	}
-	v, err := strconv.ParseInt(value.StringValue, 10, 64)
+	v, err := strconv.ParseInt(value.Items[value.Index], 10, 64)
 	if err != nil {
-		return errors.Wrapf(err, "cant ParseInt, %s", value.StringValue)
+		return errors.Wrapf(err, "cant ParseInt, %s", value.Items[value.Index])
 	}
 	c.Value = &v
 	value.ReflectValue.Set(reflect.ValueOf(c.Value))

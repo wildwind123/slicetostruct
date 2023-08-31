@@ -11,9 +11,9 @@ type ConvertInt64 struct {
 }
 
 func (c *ConvertInt64) Set(value *ConvertValueParams) error {
-	v, err := strconv.ParseInt(value.StringValue, 10, 64)
+	v, err := strconv.ParseInt(value.Items[value.Index], 10, 64)
 	if err != nil {
-		return errors.Wrapf(err, "cant ParseInt, %s", value.StringValue)
+		return errors.Wrapf(err, "cant ParseInt, %s", value.Items[value.Index])
 	}
 	c.Value = v
 	value.ReflectValue.SetInt(c.Value)

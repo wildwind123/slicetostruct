@@ -7,8 +7,11 @@ import (
 )
 
 type ConvertValueParams struct {
-	StringValue  string
+	Items        []string
+	Index        int
 	ReflectValue *reflect.Value
+	Tags         []string
+	FieldName    *string
 }
 
 type Converter interface {

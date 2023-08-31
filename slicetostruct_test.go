@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/go-faster/errors"
 )
 
 type T1 struct {
@@ -39,6 +41,12 @@ type T6 struct {
 }
 
 type T7 struct {
+	ID    int64 `ss:"'is, id',omitempty"`
+	ID2   int64 `ss:"id2"`
+	ID1_2 int64 `ss:"-"`
+}
+
+type T8 struct {
 	ID    int64 `ss:"'is, id',omitempty"`
 	ID2   int64 `ss:"id2"`
 	ID1_2 int64 `ss:"-"`
@@ -131,7 +139,7 @@ func TestToStructTag(t *testing.T) {
 	}
 
 	sliceToStruct.SetFieldNames([]string{"fake", "id", "id2", "ss"})
-	res, err = sliceToStruct.ToStruct([]string{"d", "123", "33"})
+	res, err = sliceToStruct.ToStruct([]string{"0", "123", "33"})
 	if err != nil {
 		t.Error(err)
 		return
@@ -240,4 +248,38 @@ func TestGetTags(t *testing.T) {
 	if res[0] != `test1` || res[1] != `test,test1` || len(res) != 2 {
 		t.Error("wrong result")
 	}
+}
+
+type Int64Test struct {
+}
+
+func (k *Int64Test) Set(value *ConvertValueParams) error {
+	if *value.FieldName == "id" {
+		value.Items[value.Index] = "333"
+	}
+	d := ConvertInt64{}
+	err := d.Set(value)
+	if err != nil {
+		return errors.Wrap(err, "Int64Test")
+	}
+	return nil
+}
+
+func TestSetConverter(t *testing.T) {
+	sliceToStruct := New[T6](Params{})
+
+	res, err := sliceToStruct.ToStruct([]string{"1", "123", "33"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res.ID != 1 || res.ID1_2 != 0 || res.ID2 != 123 {
+		t.Error("wrong result")
+	}
+	sliceToStruct.SetConverter("int64", &Int64Test{})
+	res, _ = sliceToStruct.ToStruct([]string{"1", "123", "33"})
+	if res.ID != 333 || res.ID1_2 != 0 || res.ID2 != 123 {
+		t.Error("wrong result")
+	}
+	fmt.Println(res)
 }
