@@ -22,6 +22,7 @@ type SliceToStruct[T any] struct {
 
 type Params struct {
 	ReturnErrIndexDoesNotExist bool
+	ReplaceCommaToDotForFloat  bool
 	FieldNames                 []string
 	converters                 *converters
 }
@@ -32,14 +33,17 @@ func New[T any](params Params) *SliceToStruct[T] {
 		params.converters.SetConverter("int64", &ConvertInt64{})
 		params.converters.SetConverter("*int64", &ConvertNullInt64{})
 		params.converters.SetConverter("int", &ConvertInt{})
-		params.converters.SetConverter("sql.NullInt64", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullFloat64", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullString", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullInt32", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullInt16", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullByte", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullBool", &ConvertSqlValue{})
-		params.converters.SetConverter("sql.NullTime", &ConvertSqlValue{})
+		convertSqlValue := ConvertSqlValue{
+			params: &params,
+		}
+		params.converters.SetConverter("sql.NullInt64", &convertSqlValue)
+		params.converters.SetConverter("sql.NullFloat64", &convertSqlValue)
+		params.converters.SetConverter("sql.NullString", &convertSqlValue)
+		params.converters.SetConverter("sql.NullInt32", &convertSqlValue)
+		params.converters.SetConverter("sql.NullInt16", &convertSqlValue)
+		params.converters.SetConverter("sql.NullByte", &convertSqlValue)
+		params.converters.SetConverter("sql.NullBool", &convertSqlValue)
+		params.converters.SetConverter("sql.NullTime", &convertSqlValue)
 	}
 
 	sTS := &SliceToStruct[T]{
@@ -148,12 +152,18 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			v := items[fieldIndex]
 			field.Set(reflect.ValueOf(&v))
 		case "float64":
+			if sTS.ReplaceCommaToDotForFloat {
+				items[fieldIndex] = strings.Replace(items[fieldIndex], ",", ".", 1)
+			}
 			v, err := strconv.ParseFloat(items[fieldIndex], 64)
 			if err != nil {
 				return nil, errors.Wrap(err, "")
 			}
 			field.Set(reflect.ValueOf(v))
 		case "*float64":
+			if sTS.ReplaceCommaToDotForFloat {
+				items[fieldIndex] = strings.Replace(items[fieldIndex], ",", ".", 1)
+			}
 			v, err := strconv.ParseFloat(items[fieldIndex], 64)
 			if err != nil {
 				return nil, errors.Wrap(err, "")
