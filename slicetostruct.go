@@ -130,9 +130,11 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			continue
 		}
 
+		errInfo := fmt.Sprintf("field = %s, fieldValue = %s, index = %d", sliceFieldName, items[fieldIndex], i)
+
 		converter, err := sTS.converters.GetConverter(fieldType)
 		if err != nil && !errors.Is(err, ErrConverterDoesNotExist) {
-			return nil, errors.Wrap(err, "cant sTS.converters.GetConverter")
+			return nil, errors.Wrapf(err, "cant sTS.converters.GetConverter. %s", errInfo)
 		}
 		if err == nil {
 			err = converter.Set(&ConvertValueParams{
@@ -144,7 +146,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 				FieltType:    fieldType,
 			})
 			if err != nil {
-				return nil, errors.Wrap(err, "cant converter.Set")
+				return nil, errors.Wrapf(err, "cant converter.Set. %s", errInfo)
 			}
 			continue
 		}
@@ -153,7 +155,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 		case "*int":
 			v, err := strconv.ParseInt(items[fieldIndex], 10, 64)
 			if err != nil {
-				return nil, errors.Wrap(err, "")
+				return nil, errors.Wrapf(err, "%s", errInfo)
 			}
 			vInt := int(v)
 			field.Set(reflect.ValueOf(&vInt))
@@ -168,7 +170,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			}
 			v, err := strconv.ParseFloat(items[fieldIndex], 64)
 			if err != nil {
-				return nil, errors.Wrap(err, "")
+				return nil, errors.Wrapf(err, "%s", errInfo)
 			}
 			field.Set(reflect.ValueOf(v))
 		case "*float64":
@@ -177,7 +179,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			}
 			v, err := strconv.ParseFloat(items[fieldIndex], 64)
 			if err != nil {
-				return nil, errors.Wrap(err, "")
+				return nil, errors.Wrapf(err, "%s", errInfo)
 			}
 			field.Set(reflect.ValueOf(&v))
 		case "time.Time":
@@ -187,7 +189,7 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			}
 			t, err := time.Parse(timeLayout, items[fieldIndex])
 			if err != nil {
-				return nil, errors.Wrap(err, "")
+				return nil, errors.Wrapf(err, "%s", errInfo)
 			}
 			field.Set(reflect.ValueOf(t))
 		case "*time.Time":
@@ -197,11 +199,11 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 			}
 			t, err := time.Parse(timeLayout, items[fieldIndex])
 			if err != nil {
-				return nil, errors.Wrap(err, "")
+				return nil, errors.Wrapf(err, "%s", errInfo)
 			}
 			field.Set(reflect.ValueOf(&t))
 		default:
-			return nil, errors.New(fmt.Sprintf("type not implement %s", fieldType))
+			return nil, errors.Wrapf(errors.New(fmt.Sprintf("type not implement %s", fieldType)), "%s", errInfo)
 		}
 
 	}
