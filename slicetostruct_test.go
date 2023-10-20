@@ -57,6 +57,22 @@ type T9 struct {
 	ID sql.NullInt64
 }
 
+type T10 struct {
+	ID int64 `ss:"Id_alias"`
+}
+
+type T11 struct {
+	ID int64 `ss:"ID_alias"`
+}
+
+type T12 struct {
+	ID int64 `ss:"id_alias"`
+}
+
+type T13 struct {
+	ID int64
+}
+
 type TAll struct {
 	ID         int64      `ss:"id"`
 	Name       string     `ss:"name"`
@@ -299,4 +315,57 @@ func TestSqlNullInt64(t *testing.T) {
 		t.Error("wrong result")
 	}
 	fmt.Println(res)
+}
+
+func TestNoneCaseSensitive(t *testing.T) {
+	sliceToStruct := New[T10](Params{
+		NotCaseSensitive: true,
+	})
+	sliceToStruct.SetFieldNames([]string{"iD_alias"})
+	res, err := sliceToStruct.ToStruct([]string{"1"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res.ID != 1 {
+		t.Error("wrong result")
+	}
+
+	sliceToStruct2 := New[T11](Params{
+		NotCaseSensitive: true,
+	})
+	sliceToStruct2.SetFieldNames([]string{"iD_alias"})
+	res2, err := sliceToStruct2.ToStruct([]string{"1"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res2.ID != 1 {
+		t.Error("wrong result")
+	}
+
+	sliceToStruct3 := New[T12](Params{
+		NotCaseSensitive: true,
+	})
+	sliceToStruct3.SetFieldNames([]string{"iD_alias"})
+	res3, err := sliceToStruct3.ToStruct([]string{"1"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res3.ID != 1 {
+		t.Error("wrong result")
+	}
+
+	sliceToStruct4 := New[T12](Params{
+		NotCaseSensitive: true,
+	})
+	res4, err := sliceToStruct4.ToStruct([]string{"1"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res4.ID != 1 {
+		t.Error("wrong result")
+	}
 }
