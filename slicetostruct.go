@@ -25,6 +25,7 @@ type Params struct {
 	ReplaceCommaToDot          bool
 	ReturnErrIndexDoesNotExist bool
 	FieldNames                 []string
+	NotCaseSensitive           bool
 	converters                 *converters
 }
 
@@ -59,14 +60,20 @@ func (sTS *SliceToStruct[T]) SetConverter(name string, converter Converter) {
 }
 
 func (sTS *SliceToStruct[T]) SetFieldNames(fieldNames []string) {
+	copyFieldNames := make([]string, len(fieldNames))
+	copy(copyFieldNames, fieldNames)
+
 	if len(fieldNames) == 0 {
 		sTS.fieldNames = nil
 		return
 	}
 
-	fieldNamesMap := make(map[string]int, len(fieldNames))
-	for i := range fieldNames {
-		fieldNamesMap[fieldNames[i]] = i
+	fieldNamesMap := make(map[string]int, len(copyFieldNames))
+	for i := range copyFieldNames {
+		if sTS.NotCaseSensitive {
+			copyFieldNames[i] = strings.ToLower(copyFieldNames[i])
+		}
+		fieldNamesMap[copyFieldNames[i]] = i
 	}
 	sTS.fieldNames = fieldNamesMap
 }
@@ -92,6 +99,9 @@ func (sTS *SliceToStruct[T]) ToStruct(items []string) (*T, error) {
 		tags := getTags(fieldInfo.Tag.Get(keyTag))
 		if len(tags) > 0 && tags[0] != "" {
 			sliceFieldName = tags[0]
+		}
+		if sTS.NotCaseSensitive {
+			sliceFieldName = strings.ToLower(sliceFieldName)
 		}
 		if sliceFieldName == "-" {
 			continue
