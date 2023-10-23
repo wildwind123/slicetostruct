@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/go-faster/errors"
 )
@@ -74,11 +75,18 @@ func (c *ConvertSqlValue) Set(value *ConvertValueParams) error {
 		}
 		value.ReflectValue.Set(reflect.ValueOf(v))
 	case "sql.NullTime":
-		v := sql.NullTime{}
-		err = v.Scan(value.Items[value.Index])
-		if err != nil {
-			return errors.Wrap(err, "cant c.Value.Scan")
+		timeLayout := defaultTimeLayout
+		if len(value.Tags) > 2 {
+			timeLayout = value.Tags[2]
 		}
+		t, err := time.Parse(timeLayout, value.Items[value.Index])
+		if err != nil {
+			return errors.Wrap(err, "cant time.Parse")
+		}
+
+		v := sql.NullTime{}
+		v.Time = t
+		v.Valid = true
 		value.ReflectValue.Set(reflect.ValueOf(v))
 	default:
 		return errors.New(fmt.Sprintf("field type unknown = %s", value.FieltType))

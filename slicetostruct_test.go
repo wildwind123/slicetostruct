@@ -73,6 +73,10 @@ type T13 struct {
 	ID int64
 }
 
+type T14 struct {
+	Date sql.NullTime `ss:"date"`
+}
+
 type TAll struct {
 	ID         int64      `ss:"id"`
 	Name       string     `ss:"name"`
@@ -367,5 +371,17 @@ func TestNoneCaseSensitive(t *testing.T) {
 	}
 	if res4.ID != 1 {
 		t.Error("wrong result")
+	}
+}
+
+func TestSqlNullTime(t *testing.T) {
+	sliceToStruct := New[T14](Params{})
+	res, err := sliceToStruct.ToStruct([]string{"01.02.2002"})
+	if err != nil {
+		t.Errorf("%+v", err)
+		return
+	}
+	if res.Date.Time.Unix() != 1012521600 {
+		t.Error("res.Date is wrong")
 	}
 }
